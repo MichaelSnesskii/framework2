@@ -1,11 +1,12 @@
-from views import Home, About, Contact, Services, Works, Blog
+from views import Index, About, StudyPrograms, CoursesList, \
+    CreateCourse, CreateCategory, CategoryList
 
 routes = {
-    '/': Home(),
-    '/index.html/': Home(),
-    '/about-agency.html/': About(),
-    '/contact-agency.html/': Contact(),
-    '/services-agency.html/': Services(),
-    '/works-agency.html/': Works,
-    '/blog.html/': Blog(),
+    '/': Index(),
+    '/about/': About(),
+    '/study_programs/': StudyPrograms(),
+    '/courses-list/': CoursesList(),
+    '/create_course/': CreateCourse(),
+    '/create-category/': CreateCategory(),
+    '/category-list/': CategoryList()
 }
