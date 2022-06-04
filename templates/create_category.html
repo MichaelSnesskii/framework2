@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}
+Create a Workout
+{% endblock %}
+{% block style %}
+	{% include "inc-style.html" %}
+{% endblock %}
+{% block menu %}
+	{% include "inc-menu.html" %}
+{% endblock %}
+{% block body %}
+<h1>Create a category</h1>
+<form method="post">
+    <input type="text" name="name" placeholder="Name">
+    <button type="submit">Save and return home</button>
+</form>
+{% endblock %}
