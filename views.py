@@ -1,24 +1,29 @@
 from framework.templator import render
 from datetime import date
 from components.models import Engine
+from components.decorators import AppRoute
 
 
 site = Engine()
+routes = {}
 
 
 # Класс-контроллер - Главная страница
+@AppRoute(routes=routes, url='/')
 class Index:
     def __call__(self, request):
         return '200 OK', render('index.html', objects_list=site.categories)
 
 
 # Класс-контроллер - Страница "О проекте"
+@AppRoute(routes=routes, url='/about/')
 class About:
     def __call__(self, request):
         return '200 OK', render('about.html')
 
 
 # Класс-контроллер - Страница "Расписания"
+@AppRoute(routes=routes, url='/study_programs/')
 class StudyPrograms:
     def __call__(self, request):
         return '200 OK', render('study-programs.html', data=date.today())
@@ -31,6 +36,7 @@ class NotFound404:
 
 
 # Класс-контроллер - Страница "Список курсов"
+@AppRoute(routes=routes, url='/courses-list/')
 class CoursesList:
     def __call__(self, request):
 
@@ -46,6 +52,7 @@ class CoursesList:
 
 
 # Класс-контроллер - Страница "Создать курс"
+@AppRoute(routes=routes, url='/create-course/')
 class CreateCourse:
     category_id = -1
 
@@ -83,6 +90,7 @@ class CreateCourse:
 
 
 # Класс-контроллер - Страница "Создать категорию"
+@AppRoute(routes=routes, url='/create-category/')
 class CreateCategory:
     def __call__(self, request):
 
@@ -113,6 +121,7 @@ class CreateCategory:
 
 
 # Класс-контроллер - Страница "Список категорий"
+@AppRoute(routes=routes, url='/category-list/')
 class CategoryList:
     def __call__(self, request):
         return '200 OK', render('category_list.html',

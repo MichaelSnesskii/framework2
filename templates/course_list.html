@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}
+workout list
+{% endblock %}
+{% block style %}
+	{% include "inc-style.html" %}
+{% endblock %}
+{% block menu %}
+	{% include "inc-menu.html" %}
+{% endblock %}
+{% block body %}
+    <div>
+        <a href="/">back to home page</a>
+    </div>
+
+    <br>
+    <br>
+
+    <div>
+        <a href="/create_course/?id={{id}}">create a new workout</a>
+        <br>
+        <h1>List of workouts for a category "{{name}}"</h1>
+        {% for item in objects_list %}
+        <li>
+            {{item.name}}
+        </li>
+        {% endfor %}
+    </div>
+{% endblock %}
