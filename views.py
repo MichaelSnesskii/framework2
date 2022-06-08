@@ -2,34 +2,35 @@ from framework.templator import render
 from datetime import date
 from components.models import Engine
 from components.decorators import AppRoute
+from components.cbv import ListView, CreateView
 
 
 site = Engine()
 routes = {}
 
 
-# Класс-контроллер - Главная страница
+# контроллер - Главная
 @AppRoute(routes=routes, url='/')
 class Index:
     def __call__(self, request):
         return '200 OK', render('index.html', objects_list=site.categories)
 
 
-# Класс-контроллер - Страница "О проекте"
+# контроллер - "О проекте"
 @AppRoute(routes=routes, url='/about/')
 class About:
     def __call__(self, request):
         return '200 OK', render('about.html')
 
 
-# Класс-контроллер - Страница "Расписания"
+# контроллер "Расписания"
 @AppRoute(routes=routes, url='/study_programs/')
 class StudyPrograms:
     def __call__(self, request):
         return '200 OK', render('study-programs.html', data=date.today())
 
 
-# Класс-контроллер - Страница 404
+# контроллер - Страница 404
 class NotFound404:
     def __call__(self, request):
         return '404 WHAT', '404 PAGE Not Found'
@@ -51,7 +52,7 @@ class CoursesList:
             return '200 OK', 'No courses have been added yet'
 
 
-# Класс-контроллер - Страница "Создать курс"
+# контроллер - "Создать курс"
 @AppRoute(routes=routes, url='/create-course/')
 class CreateCourse:
     category_id = -1
@@ -79,7 +80,6 @@ class CreateCourse:
         else:
             try:
                 self.category_id = int(request['request_params']['id'])
-                print(f'ахх {request}')
                 category = site.find_category_by_id(int(self.category_id))
 
                 return '200 OK', render('create_course.html',
@@ -89,7 +89,7 @@ class CreateCourse:
                 return '200 OK', 'No categories have been added yet'
 
 
-# Класс-контроллер - Страница "Создать категорию"
+# контроллер - "Создать категорию"
 @AppRoute(routes=routes, url='/create-category/')
 class CreateCategory:
     def __call__(self, request):
@@ -120,9 +120,49 @@ class CreateCategory:
                                     categories=categories)
 
 
-# Класс-контроллер - Страница "Список категорий"
+# контроллер - "Список категорий"
 @AppRoute(routes=routes, url='/category-list/')
 class CategoryList:
     def __call__(self, request):
         return '200 OK', render('category_list.html',
                                 objects_list=site.categories)
+
+
+# контроллер - "Список студентов"
+@AppRoute(routes=routes, url='/student-list/')
+class StudentListView(ListView):
+    queryset = site.students
+    template_name = 'student_list.html'
+
+
+# контроллер - "Создать студента"
+@AppRoute(routes=routes, url='/create-student/')
+class StudentCreateView(CreateView):
+    template_name = 'create_student.html'
+
+    def create_obj(self, data: dict):
+        name = data['name']
+        name = site.decode_value(name)
+        new_obj = site.create_user('student', name)
+        site.students.append(new_obj)
+
+
+# контроллер - "Добавить студента на курс"
+@AppRoute(routes=routes, url='/add-student/')
+class AddStudentByCourseCreateView(CreateView):
+    template_name = 'add_student.html'
+
+    def get_context_data(self):
+        context = super().get_context_data()
+        context['courses'] = site.courses
+        context['students'] = site.students
+        return context
+
+    def create_obj(self, data: dict):
+        course_name = data['course_name']
+        course_name = site.decode_value(course_name)
+        course = site.get_course(course_name)
+        student_name = data['student_name']
+        student_name = site.decode_value(student_name)
+        student = site.get_student(student_name)
+        course.add_student(student)
