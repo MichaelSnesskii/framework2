@@ -1,12 +1,14 @@
 from framework.templator import render
 from datetime import date
-from components.models import Engine
+from components.models import Engine, MapperRegistry
 from components.decorators import AppRoute
 from components.cbv import ListView, CreateView
-
+from components.unit_of_work import UnitOfWork
 
 site = Engine()
 routes = {}
+UnitOfWork.new_current()
+UnitOfWork.get_current().set_mapper_registry(MapperRegistry)
 
 
 # контроллер - Главная
@@ -134,6 +136,10 @@ class StudentListView(ListView):
     queryset = site.students
     template_name = 'student_list.html'
 
+    def get_queryset(self):
+        mapper = MapperRegistry.get_current_mapper('student')
+        return mapper.all()
+
 
 # контроллер - "Создать студента"
 @AppRoute(routes=routes, url='/create-student/')
@@ -145,6 +151,8 @@ class StudentCreateView(CreateView):
         name = site.decode_value(name)
         new_obj = site.create_user('student', name)
         site.students.append(new_obj)
+        new_obj.mark_new()
+        UnitOfWork.get_current().commit()
 
 
 # контроллер - "Добавить студента на курс"
