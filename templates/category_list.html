@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}
+Training schedule
+{% endblock %}
+{% block menu %}
+	{% include "inc-menu.html" %}
+{% endblock %}
+{% block body %}
+    <a href="/">back</a>
+
+    <h1>Types of training</h1>
+    <ul>
+
+        {% for item in objects_list %}
+        <li>
+            {{item.name}} <span>Number of workouts: {{item.course_count()}}</span>
+        </li>
+        {% endfor %}
+    </ul>
+
+	<div>
+		<li><a href="/course_list/">Types of courses</a></li>
+		<li><a href="/create_course/">create a course</a></li>
+	</div>
+{% endblock %}
