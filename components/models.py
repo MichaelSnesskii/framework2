@@ -1,12 +1,19 @@
-import quopri
+from quopri import decodestring
 import sqlite3
 from components.unit_of_work import DomainObject
+from components.universal_mapper import BaseMapper
 
 
 # Абстрактный пользователь
 class User:
-    def __init__(self, name):
-        self.name = name
+    def __init__(self, **kwargs):
+        if 'name' in kwargs:
+            self.name = kwargs.get('name')
+
+        if 'id' in kwargs:
+            self.id = kwargs.get('id')
+
+        self.courses = []
 
 # Учитель
 class Teacher(User):
@@ -15,9 +22,9 @@ class Teacher(User):
 
 # Студент
 class Student(User, DomainObject):
-    def __init__(self, name):
-        self.courses = []
-        super().__init__(name)
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
 
 # Фабрика пользователей
@@ -27,9 +34,10 @@ class UserFactory:
         'teacher': Teacher
     }
 
+    # порождающий паттерн Фабричный метод
     @classmethod
-    def create(cls, type_, name):
-        return cls.types[type_](name)
+    def create(cls, type_):
+        return cls.types[type_]()
 
 
 # Курс
@@ -74,21 +82,18 @@ class CourseFactory:
 
 
 # Категория
-class Category:
+class Category(DomainObject):
+    def __init__(self, **kwargs):
+        if 'name' in kwargs:
+            self.name = kwargs.get('name')
 
-    auto_id = 0
+        if 'id' in kwargs:
+            self.id = kwargs.get('id')
 
-    def __init__(self, name, category):
-        self.id = Category.auto_id
-        Category.auto_id += 1
-        self.name = name
-        self.category = category
         self.courses = []
 
     def course_count(self):
         result = len(self.courses)
-        if self.category:
-            result += self.category.course_count()
         return result
 
 
@@ -101,16 +106,15 @@ class Engine:
         self.categories = []
 
     @staticmethod
-    def create_user(type_, name):
-        return UserFactory.create(type_, name)
+    def create_user(type_):
+        return UserFactory.create(type_)
 
     @staticmethod
-    def create_category(name, category=None):
-        return Category(name, category)
+    def create_category():
+        return Category()
 
     def find_category_by_id(self, id):
         for item in self.categories:
-            print('item', item.id)
             if item.id == id:
                 return item
         raise Exception(f'Нет категории с id = {id}')
@@ -133,97 +137,36 @@ class Engine:
     @staticmethod
     def decode_value(val):
         val_b = bytes(val.replace('%', '=').replace("+", " "), 'UTF-8')
-        val_decode_str = quopri.decodestring(val_b)
+        val_decode_str = decodestring(val_b)
         return val_decode_str.decode('UTF-8')
 
 
-class StudentMapper:
+class StudentMapper(BaseMapper):
+    tablename = 'student'
+    model = Student
 
-    def __init__(self, connection):
-        self.connection = connection
-        self.cursor = connection.cursor()
-        self.tablename = 'student'
 
-    def all(self):
-        statement = f'SELECT * from {self.tablename}'
-        self.cursor.execute(statement)
-        result = []
-        for item in self.cursor.fetchall():
-            id, name = item
-            student = Student(name)
-            student.id = id
-            result.append(student)
-        return result
-
-    def find_by_id(self, id):
-        statement = f"SELECT id, name FROM {self.tablename} WHERE id=?"
-        self.cursor.execute(statement, (id,))
-        result = self.cursor.fetchone()
-        if result:
-            return Student(*result)
-        else:
-            raise RecordNotFoundException(f'record with id={id} not found')
-
-    def insert(self, obj):
-        statement = f"INSERT INTO {self.tablename} (name) VALUES (?)"
-        self.cursor.execute(statement, (obj.name,))
-        try:
-            self.connection.commit()
-        except Exception as e:
-            raise DbCommitException(e.args)
-
-    def update(self, obj):
-        statement = f"UPDATE {self.tablename} SET name=? WHERE id=?"
-        self.cursor.execute(statement, (obj.name, obj.id))
-        try:
-            self.connection.commit()
-        except Exception as e:
-            raise DbUpdateException(e.args)
-
-    def delete(self, obj):
-        statement = f"DELETE FROM {self.tablename} WHERE id=?"
-        self.cursor.execute(statement, (obj.id,))
-        try:
-            self.connection.commit()
-        except Exception as e:
-            raise DbDeleteException(e.args)
+class CategoryMapper(BaseMapper):
+    tablename = 'categories'
+    model = Category
 
 
 connection = sqlite3.connect('project.sqlite')
 
 
-# паттерн - Data Mapper
 class MapperRegistry:
     mappers = {
         'student': StudentMapper,
+        'category': CategoryMapper,
     }
 
     @staticmethod
     def get_mapper(obj):
-
         if isinstance(obj, Student):
             return StudentMapper(connection)
+        elif isinstance(obj, Category):
+            return CategoryMapper(connection)
 
     @staticmethod
     def get_current_mapper(name):
         return MapperRegistry.mappers[name](connection)
-
-
-class DbCommitException(Exception):
-    def __init__(self, message):
-        super().__init__(f'Db commit error: {message}')
-
-
-class DbUpdateException(Exception):
-    def __init__(self, message):
-        super().__init__(f'Db update error: {message}')
-
-
-class DbDeleteException(Exception):
-    def __init__(self, message):
-        super().__init__(f'Db delete error: {message}')
-
-
-class RecordNotFoundException(Exception):
-    def __init__(self, message):
-        super().__init__(f'Record not found: {message}')

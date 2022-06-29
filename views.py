@@ -11,28 +11,28 @@ UnitOfWork.new_current()
 UnitOfWork.get_current().set_mapper_registry(MapperRegistry)
 
 
-# контроллер - Главная
+# Класс-контроллер - Главная страница
 @AppRoute(routes=routes, url='/')
 class Index:
     def __call__(self, request):
         return '200 OK', render('index.html', objects_list=site.categories)
 
 
-# контроллер - "О проекте"
+# Класс-контроллер - Страница "О проекте"
 @AppRoute(routes=routes, url='/about/')
 class About:
     def __call__(self, request):
         return '200 OK', render('about.html')
 
 
-# контроллер "Расписания"
+# Класс-контроллер - Страница "Расписания"
 @AppRoute(routes=routes, url='/study_programs/')
 class StudyPrograms:
     def __call__(self, request):
         return '200 OK', render('study-programs.html', data=date.today())
 
 
-# контроллер - Страница 404
+# Класс-контроллер - Страница 404
 class NotFound404:
     def __call__(self, request):
         return '404 WHAT', '404 PAGE Not Found'
@@ -54,14 +54,14 @@ class CoursesList:
             return '200 OK', 'No courses have been added yet'
 
 
-# контроллер - "Создать курс"
+# Класс-контроллер - Страница "Создать курс"
 @AppRoute(routes=routes, url='/create-course/')
 class CreateCourse:
     category_id = -1
 
     def __call__(self, request):
         if request['method'] == 'POST':
-
+            # метод пост
             data = request['data']
 
             name = data['name']
@@ -82,7 +82,8 @@ class CreateCourse:
         else:
             try:
                 self.category_id = int(request['request_params']['id'])
-                category = site.find_category_by_id(int(self.category_id))
+                category = site.find_category_by_id(
+                    int(self.category_id))
 
                 return '200 OK', render('create_course.html',
                                         name=category.name,
@@ -91,49 +92,38 @@ class CreateCourse:
                 return '200 OK', 'No categories have been added yet'
 
 
-# контроллер - "Создать категорию"
+# Класс-контроллер - Страница "Создать категорию"
 @AppRoute(routes=routes, url='/create-category/')
-class CreateCategory:
-    def __call__(self, request):
+class CategoriesCreateView(CreateView):
+    template_name = 'create_category.html'
 
-        if request['method'] == 'POST':
+    def create_obj(self, data: dict):
 
-            print(request)
-            data = request['data']
+        name = data.get('name')
 
-            name = data['name']
-            name = site.decode_value(name)
+        name = site.decode_value(name)
 
-            category_id = data.get('category_id')
+        new_category = site.create_category()
 
-            category = None
-            if category_id:
-                category = site.find_category_by_id(int(category_id))
+        site.categories.append(new_category)
 
-            new_category = site.create_category(name, category)
-
-            site.categories.append(new_category)
-
-            return '200 OK', render('index.html',
-                                    objects_list=site.categories)
-        else:
-            categories = site.categories
-            return '200 OK', render('create_category.html',
-                                    categories=categories)
+        schema = {'name': name}
+        new_category.mark_new(schema)
+        UnitOfWork.get_current().commit()
 
 
-# контроллер - "Список категорий"
+# Класс-контроллер - Страница "Список категорий"
 @AppRoute(routes=routes, url='/category-list/')
-class CategoryList:
-    def __call__(self, request):
-        return '200 OK', render('category_list.html',
-                                objects_list=site.categories)
+class CategoryList(ListView):
+    template_name = 'category_list.html'
+
+    def get_queryset(self):
+        mapper = MapperRegistry.get_current_mapper('category')
+        return mapper.all()
 
 
-# контроллер - "Список студентов"
 @AppRoute(routes=routes, url='/student-list/')
 class StudentListView(ListView):
-    queryset = site.students
     template_name = 'student_list.html'
 
     def get_queryset(self):
@@ -141,21 +131,21 @@ class StudentListView(ListView):
         return mapper.all()
 
 
-# контроллер - "Создать студента"
 @AppRoute(routes=routes, url='/create-student/')
 class StudentCreateView(CreateView):
     template_name = 'create_student.html'
 
     def create_obj(self, data: dict):
-        name = data['name']
+        name = data.get('name')
         name = site.decode_value(name)
-        new_obj = site.create_user('student', name)
+        new_obj = site.create_user('student')
+
         site.students.append(new_obj)
-        new_obj.mark_new()
+        schema = {'name': name}
+        new_obj.mark_new(schema)
         UnitOfWork.get_current().commit()
 
 
-# контроллер - "Добавить студента на курс"
 @AppRoute(routes=routes, url='/add-student/')
 class AddStudentByCourseCreateView(CreateView):
     template_name = 'add_student.html'
