@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}
+Create a Workout
+{% endblock %}
+{% block menu %}
+	{% include "inc-menu.html" %}
+{% endblock %}
+{% block body %}
+    <div>
+        <a href="/course_list/?id={{id}}">back</a>
+    </div>
+
+    <br>
+    <br>
+
+    <div>
+        <h1>creating a workout for a category "{{name}}"</h1>
+        <form method="post">
+            <input type="text" name="name" placeholder="Название">
+            <button type="submit">save and return to workout list</button>
+        </form>
+    </div>
+    <p><img src="../staticfiles/img/stone_5.jpg" alt="какой-то текст"></p>
+{% endblock %}

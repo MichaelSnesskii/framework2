@@ -1,5 +1,8 @@
 import quopri
-from framework.request import GetRequests, PostRequests
+from framework.request import GetRequestClass
+
+from os import path
+from components.content_types import CONTENT_TYPES_MAP
 
 
 class PageNotFound404:
@@ -9,8 +12,9 @@ class PageNotFound404:
 
 class Framework:
 
-    def __init__(self, routes_obj):
+    def __init__(self, routes_obj, fronts_obj):
         self.routes_lst = routes_obj
+        self.fronts_applications = fronts_obj
 
     def __call__(self, environ, start_response):
         # адрес перехода
@@ -25,21 +29,24 @@ class Framework:
         method = environ['REQUEST_METHOD']
         request['method'] = method
 
-        if method == 'POST':
-            data = PostRequests().get_request_params(environ)
-            request['data'] = data
-            print(f'post-запрос: {Framework.decode_value(data)}')
-        if method == 'GET':
-            request_params = GetRequests().get_request_params(environ)
-            request['request_params'] = request_params
-            print(f'GET-параметры: {request_params}')
+        #обработка запроса с помощью контроллера
+        method_class = GetRequestClass(method)
+        data = method_class.get_request_params(environ)
+        request[method_class.dict_value] = Framework.decode_value(data)
+        print(f'{method}: {Framework.decode_value(data)}')
 
+        #находит годный контроллер
         if path in self.routes_lst:
             view = self.routes_lst[path]
+
         else:
             view = PageNotFound404()
 
+        for front_app in self.fronts_applications:
+            front_app(environ, request)
+
         code, body = view(request)
+
         start_response(code, [('Content-Type', 'text/html')])
         return [body.encode('utf-8')]
 

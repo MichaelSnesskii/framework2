@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}
+Create a Workout
+{% endblock %}
+{% block menu %}
+	{% include "inc-menu.html" %}
+{% endblock %}
+{% block body %}
+<h1>Create a category</h1>
+<form method="post">
+    <input type="text" name="name" placeholder="Name">
+    <button type="submit">Save and return home</button>
+</form>
+<p><img src="../staticfiles/img/stone_3.jpg" alt="какой-то текст"></p>
+{% endblock %}

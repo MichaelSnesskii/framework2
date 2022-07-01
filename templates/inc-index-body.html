@@ -1,0 +1,56 @@
+<div class="content">
+    <h1>training programs</h1>
+    <p>training courses</p>
+    <p>the schedule is valid for: {{data}} <b>(дата из шаблона)</b></p>
+    <table>
+        <tr class="head">
+            <th></th>
+            <th>Bobruisk</th>
+            <th>St. Petersburg</th>
+            <th> Yekaterinburg</th>
+        </tr>
+        <tr>
+            <th>Getting useful skills</th>
+            <td>Sat, 28 May 2022<br />11:00 - 14:00</td>
+            <td>Sat, 28 May 2022<br />11:00 - 14:00</td>
+            <td>Sat, 28 May 2022<br />11:00 - 14:00</td>
+        </tr>
+        <tr class="even">
+            <th>Getting useful skills</th>
+            <td>Sat, 28 May 2022<br />11:00 - 13:00</td>
+            <td>Sat, 28 May 2022<br />11:00 - 13:00</td>
+            <td>Sat, 28 May 2022<br />11:00 - 13:00</td>
+        </tr>
+        <tr>
+            <th>Getting useful skills.</th>
+            <td>Sat, 28 May 2022<br />11:00 - 14:00</td>
+            <td>Sat, 28 May 2022<br />11:00 - 14:00</td>
+            <td>Sat, 28 May 2022<br />11:00 - 14:00</td>
+        </tr>
+        <tr class="even">
+            <th>Getting useful skills</th>
+            <td>Sat, 28 May 2022<br />11:00 - 16:00</td>
+            <td>Sat, 28 May 2022<br />11:00 - 16:00</td>
+            <td>Sat, 28 May 2022<br />11:00 - 16:00</td>
+        </tr>
+    </table>
+    <form action="" method="post">
+        <fieldset>
+            <legend>Register</legend>
+            <p><label class="title" for="name">Your name:</label>
+                 <input type="text" name="name" id="name"><br />
+                 <label class="title" for="email">Your email:</label>
+                 <input type="text" name="email" id="email"></p>
+            <p><label for="location" class="title">nearest hall:</label>
+                 <select name="location" id="location">
+                     <option value="msk">Bobruisk</option>
+                     <option value="spb">Bobruisk</option>
+                     <option value="ekb">Bobruisk</option>
+                 </select></p>
+            <span class="title">You are a member?</span>
+            <label><input type="radio" name="member" value="yes" /> Да</label>
+            <label><input type="radio" name="member" value="no" /> Нет</label></p>
+        </fieldset>
+    <div class="submit"><input type="submit" value="Register" /></div>
+    </form>
+</div>

@@ -2,11 +2,11 @@
 {% block title %}
 Главная страница
 {% endblock %}
-{% block style %}
-	{% include "inc-style.html" %}
-{% endblock %}
 {% block menu %}
 	{% include "inc-menu.html" %}
+	{% if geo.country_name != 'Not found' %}
+        <li>{{geo.country_name}}</li>
+    {% endif %}
 {% endblock %}
 {% block body %}
 	<div>
@@ -17,8 +17,22 @@
         {% for item in objects_list %}
         <li>
             {{item.name}} <span>Количество курсов: {{item.course_count()}}</span>
-			<a href="/courses-list/?id={{item.id}}">Показать курсы*</a>
+			<a href="/courses-list/?id={{item.id}}">Показать курсы</a>
         </li>
         {% endfor %}
+		<br>
+		<hr>
 	</div>
+	<div>
+		<li>
+			<a href="/student-list/">Список студентов</a>
+		</li>
+		<li>
+			<a href="/create-student/">Создать студента</a>
+		</li>
+		<li>
+			<a href="/add-student/">Добавить студента на курс</a>
+		</li>
+	</div>
+	<p><img src="staticfiles/img/stone.jpg" alt="какой-то текст"></p>
 {% endblock %}
