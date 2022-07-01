@@ -15,14 +15,14 @@ UnitOfWork.get_current().set_mapper_registry(MapperRegistry)
 @AppRoute(routes=routes, url='/')
 class Index:
     def __call__(self, request):
-        return '200 OK', render('index.html', objects_list=site.categories)
+        return '200 OK', render('index.html', objects_list=site.categories, geo=request.get('geo', None))
 
 
 # Класс-контроллер - Страница "О проекте"
 @AppRoute(routes=routes, url='/about/')
 class About:
     def __call__(self, request):
-        return '200 OK', render('about.html')
+        return '200 OK', render('about.html', geo=request.get('geo', None))
 
 
 # Класс-контроллер - Страница "Расписания"

@@ -4,6 +4,9 @@
 {% endblock %}
 {% block menu %}
 	{% include "inc-menu.html" %}
+	{% if geo.country_name != 'Not found' %}
+        <li>{{geo.country_name}}</li>
+    {% endif %}
 {% endblock %}
 {% block body %}
 	<div>
@@ -31,4 +34,5 @@
 			<a href="/add-student/">Добавить студента на курс</a>
 		</li>
 	</div>
+	<p><img src="staticfiles/img/stone.jpg" alt="какой-то текст"></p>
 {% endblock %}
